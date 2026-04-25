@@ -3,7 +3,6 @@
 **Student:** Yaw Acheampong Ahenkora Gyamera | **Index:** 10022200141
 **Institution:** Academic City University College
 **Deployed:** [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)
-**Repository:** [https://github.com/GyameraYaw/ai_10022200141](https://github.com/GyameraYaw/ai_10022200141)
 
 ---
 
