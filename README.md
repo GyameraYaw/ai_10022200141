@@ -66,10 +66,10 @@ streamlit run app/streamlit_app.py
 ## Running Experiments
 
 ```bash
-python scripts/exp_chunking.py          # PART A  — chunking strategy comparison
-python scripts/exp_retrieval_failures.py # PART B  — failure cases + hybrid fix
-python scripts/exp_prompts.py           # PART C  — prompt iteration experiment
-python scripts/exp_adversarial.py       # PART E  — adversarial evaluation
+python scripts/exp_chunking.py           # — chunking strategy comparison
+python scripts/exp_retrieval_failures.py #   — failure cases + hybrid fix
+python scripts/exp_prompts.py           #   — prompt iteration experiment
+python scripts/exp_adversarial.py       #   — adversarial evaluation
 ```
 
 Results are written to `experiments/`.
@@ -90,7 +90,7 @@ Results are written to `experiments/`.
 
 ---
 
-## Novel Feature (PART G)
+## Novel Feature
 
 **Domain-specific scoring + session memory:**
 - Classifies each query as `election_numeric`, `budget_policy`, or `general`
@@ -102,11 +102,5 @@ Results are written to `experiments/`.
 ## Deployment
 
 Deployed on Streamlit Community Cloud.  
-**Live URL: [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)**
+**Live URL: [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)** 
 
----
-
-## Repository
-
-GitHub: `https://github.com/GyameraYaw/ai_10022200141`  
-Collaborator invited: `GodwinDansoAcity`
