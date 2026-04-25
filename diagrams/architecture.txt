@@ -1,0 +1,139 @@
+CS4241 Manual RAG Chatbot — Architecture Diagram (ASCII)
+Student: Yaw Acheampong Ahenkora Gyamera | Index: 10022200141
+
+═══════════════════════════════════════════════════════════════════════════════
+                        BUILD-TIME PIPELINE
+═══════════════════════════════════════════════════════════════════════════════
+
+  ┌─────────────────────┐    ┌──────────────────────────┐
+  │ Ghana_Election_      │    │ 2025-Budget-Statement.pdf │
+  │ Result.csv           │    │ (from mofep.gov.gh)       │
+  └──────────┬──────────┘    └────────────┬─────────────┘
+             │                            │
+             ▼                            ▼
+  ┌──────────────────────────────────────────────────────┐
+  │                  data_loader.py                      │
+  │  • CSV: normalize cols, strip whitespace, coerce int │
+  │  • PDF: pypdf extract, strip headers/footers, clean  │
+  └──────────────────────────┬───────────────────────────┘
+                             │  cleaned rows / pages
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │                   chunker.py                         │
+  │  Strategy 1: fixed_char (500 chars / 50 overlap)     │
+  │  Strategy 2: sentence   (≈400 tok / 50 tok overlap)  │ ← CHOSEN
+  │  Strategy 3: structure  (row-as-chunk / section)     │
+  │                                                      │
+  │  Each chunk → Chunk(id, text, source, source_intent, │
+  │               metadata)                              │
+  └──────────────────────────┬───────────────────────────┘
+                             │  list[Chunk]
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │                   embedder.py                        │
+  │  • Model: all-MiniLM-L6-v2 (384-dim, CPU)            │
+  │  • Manual batching (batch_size=64)                   │
+  │  • L2 normalisation (v / ‖v‖)                        │
+  └──────────────────────────┬───────────────────────────┘
+                             │  np.ndarray (N, 384)
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │                 vector_store.py                      │
+  │  • Custom NumPy store (no FAISS)                     │
+  │  • Persisted: data/processed/index.npz + chunks.json │
+  └──────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        QUERY-TIME PIPELINE
+═══════════════════════════════════════════════════════════════════════════════
+
+  ┌─────────────────────────────┐
+  │       User Query            │
+  └──────────────┬──────────────┘
+                 │
+                 ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  memory.py — Stage 1: Anaphora Resolution [PART G]   │
+  │  If query starts with "and…", "what about…" etc.,    │
+  │  prepend the previous query for context.             │
+  └──────────────────────────┬───────────────────────────┘
+                             │  resolved_query
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  memory.py — Stage 2: Intent Classification [PART G] │
+  │  → election_numeric | budget_policy | general        │
+  └──────────────────────────┬───────────────────────────┘
+                             │  intent
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  memory.py — Stage 3: Domain Boosts [PART G]         │
+  │  • +β to chunks matching intent                      │
+  │  • +β×0.5 × numeric/monetary density                 │
+  │  • −0.05 penalty on recently-seen chunks             │
+  └──────────────────────────┬───────────────────────────┘
+                             │  domain_boosts dict
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  retriever.py — Stage 4: Hybrid Retrieval [PART B]   │
+  │  • embedder.encode_single(query) → query_vec         │
+  │  • vector_store.search() → cosine scores             │
+  │  • BM25.scores_for_query() → keyword scores          │
+  │  • combined = α×vec + (1-α)×bm25 + domain_boost      │
+  │  • Sort descending, take top-k                       │
+  └──────────────────────────┬───────────────────────────┘
+                             │  list[(Chunk, combined, vec, bm25)]
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  prompt_engine.py — Stage 5: Context Selection [PART C]│
+  │  • Filter score < MIN_SCORE                          │
+  │  • Truncate each chunk to MAX_CHUNK_CHARS            │
+  │  • Budget-fit to MAX_CONTEXT_CHARS                   │
+  └──────────────────────────┬───────────────────────────┘
+                             │  selected[(Chunk, score)]
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  prompt_engine.py — Stage 6: Prompt Build [PART C]   │
+  │  Template v3 (grounded + citations):                 │
+  │  SYSTEM role + rules + numbered context + query      │
+  └──────────────────────────┬───────────────────────────┘
+                             │  prompt string
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  llm_client.py — Stage 7: LLM Call [PART D]          │
+  │  • OpenAI gpt-4o-mini, temperature=0.2               │
+  │  • Raw SDK call (no LangChain)                       │
+  └──────────────────────────┬───────────────────────────┘
+                             │  answer text
+                             ▼
+  ┌──────────────────────────────────────────────────────┐
+  │  memory.py — Stage 8: Memory Update [PART G]         │
+  │  • Push (query, retrieved_ids, answer) to ring buffer│
+  │  • Save session to data/processed/session.json       │
+  └──────────────────────────┬───────────────────────────┘
+                             │
+                             ▼
+  ┌─────────────────────────────┐
+  │   Response + Citations      │
+  │   + Retrieved chunks shown  │
+  │   + Similarity scores shown │
+  └─────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        COMPONENTS SUMMARY
+═══════════════════════════════════════════════════════════════════════════════
+
+  Component         | File                  | Part
+  ──────────────────┼───────────────────────┼──────
+  Data loader       | src/data_loader.py    | A
+  Chunker (×3)      | src/chunker.py        | A
+  Embedder          | src/embedder.py       | B
+  Vector store      | src/vector_store.py   | B
+  Retriever (hybrid)| src/retriever.py      | B
+  Prompt engine     | src/prompt_engine.py  | C
+  LLM client        | src/llm_client.py     | D
+  RAG pipeline      | src/rag_pipeline.py   | D
+  Evaluator         | src/evaluator.py      | E
+  Memory / Scoring  | src/memory.py         | G
+  UI                | app/streamlit_app.py  | Final

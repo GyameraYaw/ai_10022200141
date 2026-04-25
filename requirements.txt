@@ -1,0 +1,30 @@
+# CS4241 Manual RAG Chatbot
+# Student: Yaw Acheampong Ahenkora Gyamera | Index: 10022200141
+
+# Data
+pandas>=2.0.0
+pypdf>=4.0.0
+requests>=2.31.0
+
+# Embeddings
+# Pinned for Intel Mac (macOS Monterey) compatibility with torch 2.2.x
+sentence-transformers==2.7.0
+torch==2.2.2
+
+# Numerics — numpy<2 required by torch 2.2.x (compiled against NumPy 1.x)
+numpy<2
+
+# LLM
+openai>=1.30.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# UI
+streamlit>=1.35.0
+
+# Architecture diagram
+diagrams>=0.23.0
+
+# Utilities
+tqdm>=4.66.0

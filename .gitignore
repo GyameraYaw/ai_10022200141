@@ -1,0 +1,44 @@
+# CS4241 Manual RAG Chatbot
+# Student: Yaw Acheampong Ahenkora Gyamera | Index: 10022200141
+
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Data (raw files can be re-downloaded; index is committed for Streamlit Cloud)
+data/raw/*.csv
+data/raw/*.pdf
+data/processed/session.json
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Exam question paper
+Introduction to  Artificial  Intelligence QP.pdf
+
+# Diagram generator (replaced by draw.io source file)
+diagrams/generate_diagram.py
+
+# Walkthrough script (internal only)
+docs/walkthrough_script.md
+
+# Runtime query logs
+experiments/runs/*.jsonl
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
