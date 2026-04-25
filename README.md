@@ -101,13 +101,13 @@ Results are written to `experiments/`. Manual analysis notes are in `experiments
 
 | Experiment | Finding |
 |------------|---------|
-| Chunking (Part A) | Sentence strategy: 1,010 chunks, MRR@5 = 0.533, Hit@3 = 0.600 — best balance of quality and index size |
-| Retrieval (Part B) | Hybrid BM25 + vector moved ABFA chunk from rank 3 (score 0.661) to rank 1 (score 0.720) via exact keyword match |
-| Adversarial (Part E) | RAG: consistency 1.0, hallucination rate 0.0 — Pure LLM: consistency 0.67, hallucination rate 1.0 |
+| Chunking | Sentence strategy: 1,010 chunks, MRR@5 = 0.533, Hit@3 = 0.600 — best balance of quality and index size |
+| Retrieval  | Hybrid BM25 + vector moved ABFA chunk from rank 3 (score 0.661) to rank 1 (score 0.720) via exact keyword match |
+| Adversarial  | RAG: consistency 1.0, hallucination rate 0.0 — Pure LLM: consistency 0.67, hallucination rate 1.0 |
 
 ---
 
-## Novel Feature (Part G)
+## Novel Feature 
 
 **Domain-specific scoring + session memory:**
 - Classifies each query as `election_numeric`, `budget_policy`, or `general`
