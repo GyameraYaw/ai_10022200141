@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import streamlit as st
 
 from src.config import INDEX_PATH
+from src.memory import SessionMemory
 
 # ── Page config ───────────────────────────────────────────────────────────────
 
@@ -47,8 +48,7 @@ with st.sidebar:
     st.divider()
     if st.button("🗑️ Clear conversation", use_container_width=True):
         st.session_state.chat_history = []
-        if "pipeline" in st.session_state:
-            st.session_state.pipeline.memory.clear()
+        st.session_state.user_memory = SessionMemory()
         st.rerun()
 
 # ── Pipeline loader ───────────────────────────────────────────────────────────
@@ -72,6 +72,8 @@ pipeline = load_pipeline(prompt_version, top_k, use_memory)
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
+if "user_memory" not in st.session_state:
+    st.session_state.user_memory = SessionMemory()
 
 # ── Header ────────────────────────────────────────────────────────────────────
 
@@ -151,7 +153,7 @@ if user_query := st.chat_input("Ask about Ghana's elections or 2025 budget…"):
 
     with st.chat_message("assistant"):
         with st.spinner("Retrieving and generating answer…"):
-            result = pipeline.answer(user_query)
+            result = pipeline.answer(user_query, memory=st.session_state.user_memory)
 
         st.caption(f"Intent: {_INTENT_LABEL.get(result['intent'], result['intent'])}")
 

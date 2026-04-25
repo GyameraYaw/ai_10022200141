@@ -53,9 +53,16 @@ class RAGPipeline:
         self.retriever = Retriever(self.store, top_k=top_k)
         self.memory = SessionMemory()
 
-    def answer(self, query: str) -> dict:
+    def answer(self, query: str, memory: "SessionMemory | None" = None) -> dict:
         """
         Run the full pipeline for a user query.
+
+        Parameters
+        ----------
+        query  : the user's question
+        memory : per-session SessionMemory to use; falls back to self.memory if None.
+                 Pass a per-user memory object from st.session_state to avoid
+                 cross-session contamination when the pipeline is cached globally.
 
         Returns
         -------
@@ -69,6 +76,8 @@ class RAGPipeline:
             answer         : str (LLM response)
             timestamp      : str
         """
+        mem = memory if memory is not None else self.memory
+
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         log_path = RUNS / f"query_{ts}.jsonl"
         RUNS.mkdir(parents=True, exist_ok=True)
@@ -81,7 +90,7 @@ class RAGPipeline:
         # ── Stage 1: Anaphora resolution (PART G) ─────────────────────────
         resolved_query = query
         if self.use_memory:
-            resolved_query = self.memory.resolve_anaphora(query)
+            resolved_query = mem.resolve_anaphora(query)
         log_stage("STAGE_1_ANAPHORA", {"original": query, "resolved": resolved_query})
 
         # ── Stage 2: Intent classification (PART G) ───────────────────────
@@ -93,7 +102,7 @@ class RAGPipeline:
         if self.use_memory:
             domain_boosts = compute_domain_boosts(self.store.chunks, intent)
             # Add recency penalties to discourage re-fetching same chunks
-            penalties = self.memory.recency_penalties(self.store.chunks)
+            penalties = mem.recency_penalties(self.store.chunks)
             for cid, pen in penalties.items():
                 domain_boosts[cid] = domain_boosts.get(cid, 0.0) + pen
 
@@ -140,10 +149,10 @@ class RAGPipeline:
         # ── Stage 8: Memory update (PART G) ───────────────────────────────
         if self.use_memory:
             retrieved_ids = [c.id for c, _ in selected]
-            self.memory.push(query, retrieved_ids, answer_text)
-            self.memory.save()
+            mem.push(query, retrieved_ids, answer_text)
+            mem.save()
 
-        log_stage("STAGE_8_MEMORY_UPDATED", {"turns_stored": len(self.memory.as_list())})
+        log_stage("STAGE_8_MEMORY_UPDATED", {"turns_stored": len(mem.as_list())})
 
         # ── Return structured result ───────────────────────────────────────
         result = {
