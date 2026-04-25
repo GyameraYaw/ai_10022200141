@@ -176,7 +176,7 @@ class SessionMemory:
             return set()
         return set(self._turns[-1]["retrieved_ids"])
 
-    def recency_penalties(self, chunks: list[Chunk], penalty: float = 0.05) -> dict[str, float]:
+    def recency_penalties(self, chunks: list[Chunk], penalty: float = 0.02) -> dict[str, float]:
         """
         Return a dict of chunk_id → negative boost for chunks seen in the last turn.
         Used to encourage diversity in follow-up queries.

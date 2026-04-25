@@ -39,7 +39,7 @@ EMBEDDING_DIM = 384
 
 # ── Retrieval ─────────────────────────────────────────────────────────────────
 TOP_K = 5                    # chunks returned per query
-MIN_SCORE = 0.20             # drop chunks below this combined score
+MIN_SCORE = 0.15             # drop chunks below this combined score
 HYBRID_ALPHA = 0.7           # weight for vector score; (1-α) for BM25
 
 # ── Novel feature (PART G) ────────────────────────────────────────────────────
