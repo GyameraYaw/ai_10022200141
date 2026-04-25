@@ -1,8 +1,9 @@
 # Manual RAG Chatbot — Ghana Election & Budget Assistant
 
-**Student:** Yaw Acheampong Ahenkora Gyamera | **Index:** 10022200141
-**Institution:** Academic City University College
-**Deployed:** [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)
+- **Student:** Yaw Acheampong Ahenkora Gyamera 
+- **Index:** 10022200141
+- **Institution:** Academic City University College
+- **Deployed:** [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)
 
 ---
 
