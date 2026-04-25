@@ -102,11 +102,11 @@ Results are written to `experiments/`.
 ## Deployment
 
 Deployed on Streamlit Community Cloud.  
-Live URL: *(to be added after deploy)*
+**Live URL: [https://rag-ghana-chatbot.streamlit.app](https://rag-ghana-chatbot.streamlit.app)**
 
 ---
 
 ## Repository
 
-GitHub: `https://github.com/yawgyamera/ai_10022200141`  
+GitHub: `https://github.com/GyameraYaw/ai_10022200141`  
 Collaborator invited: `GodwinDansoAcity`
